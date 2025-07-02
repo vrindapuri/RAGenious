@@ -1,115 +1,114 @@
-# Docu-Dive
-Docu-Dive is a full-stack multi-document-search web-app by utilizing Retrieval Augmented Generation techniques to get the most out of Generative AI LLMs. I used React.js for the frontend, and Python, Langchain, AWS Bedrock, ChromaDB, and FastAPI for the backend. I used Docker to containerize the frontend and backend, AWS ECR to store the Docker images, and AWS EC2 to run the containers, with Nginx configured on EC2 to manage traffic and SSL/TLS certificates for secure access. 
+# RAGenious
 
-For a demonstration video, process document, and more information on the tech stack behind this application, visit: https://about-docu-dive.netlify.app/.
+RAGenious is a full-stack multi-document search assistant built with Retrieval-Augmented Generation (RAG) techniques. It leverages Generative AI LLMs to provide intelligent answers from user-uploaded PDFs.
 
-For more information on deploying this code, or similar code, one could follow these steps:
+Tech stack used:
 
-# Overview
-This document outlines the step-by-step process for deploying a full-stack application using Docker and AWS services. The process includes building Docker images, pushing them to AWS ECR, and deploying the application using AWS ECS and EC2.
+* 🧠 Langchain + OpenAI (RAG)
+* ⚙️ FastAPI + Python backend
+* 🧠 ChromaDB (Vector DB)
+* ☁️ AWS S3 for file storage
+* 🌐 React.js frontend
+* 🐳 Docker for containerization
+* ☁️ AWS ECR, EC2 for deployment
 
-# Prerequisites
-- AWS CLI configured with appropriate IAM permissions
-- Docker installed on your local machine
-- An AWS account with access to ECR, ECS, and EC2 services
-- Domain configured in Route 53
+---
 
-## Step-by-Step Deployment Process
-### Prepare Python Files:
-- Organize all your Python backend files, including main.py and any supporting scripts like query.py.
-### Create Dockerfiles:
-- Create Dockerfiles for both the frontend and backend applications.
-- The Dockerfiles specify the environment and dependencies needed for each component.
-```docker
-# Example Dockerfile for frontend
-FROM node:14
-WORKDIR /app
-COPY . .
-RUN npm install
-CMD ["npm", "start"]
+## 🔧 Project Structure
+
 ```
-```docker
-# Example Dockerfile for backend
-FROM python:3.9
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+RAGenious/
+├── backend/            # FastAPI, RAG logic, S3, embedding
+├── frontend/           # React UI for PDF upload and chat
+├── .env                # Environment variables (not pushed)
+├── .gitignore
+└── README.md
 ```
 
-### Build Docker Images:
-- Use the Dockerfiles to build images for the frontend and backend.
-- Ensure the correct platform is specified during the build process.
+---
+
+## 🚀 Setup & Run Locally
+
+### 1. Clone and Install
+
 ```bash
-docker build --platform linux/amd64 -t frontend-image .
-docker build --platform linux/amd64 -t backend-image .
+git clone https://github.com/vrindapuri/RAGenious.git
+cd RAGenious
 ```
-### Push Docker Images to AWS ECR:
-- Create ECR repositories for the frontend and backend if they don't exist.
-- Tag and push the Docker images to the respective ECR repositories.
-```bash
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account_id>.dkr.ecr.us-east-1.amazonaws.com
-docker tag frontend-image:latest <account_id>.dkr.ecr.us-east-1.amazonaws.com/frontend-repo:latest
-docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/frontend-repo:latest
-docker tag backend-image:latest <account_id>.dkr.ecr.us-east-1.amazonaws.com/backend-repo:latest
-docker push <account_id>.dkr.ecr.us-east-1.amazonaws.com/backend-repo:latest
-```
-### Set Up ECS Cluster:
-- Create an ECS cluster to manage the Docker containers.
-### Register ECS Task Definitions:
-- Create task definitions for the frontend and backend services using JSON configuration files.
-- These definitions specify how the containers should be run within ECS.
-```bash
-aws ecs register-task-definition --cli-input-json file://frontend-task-definition.json
-aws ecs register-task-definition --cli-input-json file://backend-task-definition.json
-```
-### Create ECS Services:
-- Create ECS services for the frontend and backend tasks.
-- Ensure the services are configured to run the correct number of tasks and are properly networked.
-```bash
-aws ecs create-service --cluster docu-dive-cluster --service-name frontend-service --task-definition frontend-task --desired-count 1 --launch-type FARGATE
-aws ecs create-service --cluster docu-dive-cluster --service-name backend-service --task-definition backend-task --desired-count 1 --launch-type FARGATE
-```
-### Set Up EC2 Instance:
-- Launch an EC2 instance to host the Nginx server.
-- Configure security groups to allow necessary traffic.
-### Deploy Nginx Configuration:
-- Configure Nginx as a reverse proxy to route traffic to the frontend and backend services.
-```nginx
-server {
-    listen 80;
-    server_name docu-dive.com www.docu-dive.com;
-    return 301 https://$host$request_uri;
-}
 
-server {
-    listen 443 ssl;
-    server_name docu-dive.com www.docu-dive.com;
+### 2. Backend Setup
 
-    ssl_certificate /etc/letsencrypt/live/docu-dive.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/docu-dive.com/privkey.pem;
-
-    location / {
-        proxy_pass http://localhost:3000;  # Frontend
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /api {
-        proxy_pass http://localhost:8000;  # Backend
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-### Run Docker Containers on EC2:
-- Run the Docker containers on the EC2 instance
-- Do this for both the frontend and backend applications.
 ```bash
-docker run -d -p 3000:3000 --name frontend-container <account_id>.dkr.ecr.us-east-1.amazonaws.com/frontend-repo:latest
-docker run -d -p 8000:8000 --name backend-container <account_id>.dkr.ecr.us-east-1.amazonaws.com/backend-repo:latest
+cd backend
+pip install -r requirements.txt
+python main.py
 ```
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+## 🌍 Environment Variables (.env)
+
+Make sure you create a `.env` file in the root directory with:
+
+```dotenv
+AWS_ACCESS_KEY_ID=your_access_key_here
+AWS_SECRET_ACCESS_KEY=your_secret_key_here
+AWS_REGION=your_aws_region
+AWS_S3_BUCKET_NAME=your_bucket_name
+```
+
+> 🔐 **Make sure `.env` is in your `.gitignore`**
+
+---
+
+## 📦 Deployment (Optional)
+
+RAGenious is ready to be deployed using Docker and AWS. Follow these simplified steps:
+
+### 🔨 Docker Build
+
+```bash
+# Backend
+cd backend
+docker build -t rag-backend .
+
+# Frontend
+cd ../frontend
+docker build -t rag-frontend .
+```
+
+### ☁️ AWS ECR Push
+
+* Authenticate to AWS ECR:
+
+```bash
+aws ecr get-login-password | docker login --username AWS --password-stdin <your-aws-account>.dkr.ecr.<region>.amazonaws.com
+```
+
+* Tag & push:
+
+```bash
+docker tag rag-backend:latest <account>.dkr.ecr.<region>.amazonaws.com/rag-backend
+
+docker tag rag-frontend:latest <account>.dkr.ecr.<region>.amazonaws.com/rag-frontend
+```
+
+### 🚀 EC2 + NGINX Deployment
+
+Run containers on EC2 and use NGINX to reverse proxy traffic to ports `3000` (frontend) and `8000` (backend).
+
+
+---
+
+## 📄 License
+
+MIT License 2025 © Vrinda Puri
+
