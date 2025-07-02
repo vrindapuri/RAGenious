@@ -1,0 +1,32 @@
+# Node.js
+/frontend/node_modules
+/frontend/build
+
+# Python
+/backend/__pycache__/
+venv/
+env/
+*.pyc
+
+# Docker
+docker-compose.yml
+/backend/Dockerfile
+/frontend/Dockerfile
+
+# Logs and temp
+*.log
+*.tmp
+*.temp
+
+# Secrets and keys
+.env
+*.pem
+/backend/.aws/
+
+# Misc
+*.sh
+/backend/data
+/backend/dependencies.txt
+/frontend/nginx.conf
+
+

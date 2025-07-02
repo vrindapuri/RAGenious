@@ -1,0 +1,42 @@
+# LLM & LangChain
+langchain==0.1.20
+openai>=1.6.1
+langchain-openai
+sentence-transformers
+chromadb
+tqdm
+tenacity
+
+# FastAPI backend
+fastapi
+uvicorn
+python-dotenv
+requests
+
+# Document parsing
+unstructured
+unstructured[all-docs]
+PyMuPDF
+pdfplumber
+markdownify
+
+# Optional RAG tools
+langchain-community
+langchain-core
+langchain-experimental
+
+# Logging & Display
+coloredlogs
+typer
+
+# Compatibility Fixes
+protobuf==3.20.3
+
+importlib_metadata==6.0.0  # Pinned to avoid pip resolver conflicts
+onnx==1.13.1
+
+
+# Skip: uvloop (incompatible with Windows)
+# uvloop
+
+# Comment out or pin any conflicting package if needed
